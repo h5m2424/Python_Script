@@ -1,3 +1,10 @@
+"""
+# mail example
+2020/06/22-20:48:01
+[CPU_Used]: 10.6 %
+[MEM_Available]: 3562 MB (44 %)
+"""
+
 import smtplib
 import time
 import psutil
