@@ -1,0 +1,1 @@
+*/5 * * * * cd /home/hello/check_port && python3 check_port.py 2>> cronjob.log &
