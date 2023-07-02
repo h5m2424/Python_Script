@@ -3,12 +3,24 @@ import subprocess
 import smtplib
 from email.mime.text import MIMEText
 from datetime import datetime
+import configparser
 
-# 定义服务器和用户名
-server = "world.hello.com"
-router = "192.168.10.254"
-user_server = "root"
-user_router = "admin"
+# 读取配置文件
+config = configparser.ConfigParser()
+config.read('config.ini')
+
+# 读取服务器相关信息
+server = config.get('Server', 'server')
+router = config.get('Server', 'router')
+user_server = config.get('Server', 'user_server')
+user_router = config.get('Server', 'user_router')
+
+# 读取邮件相关配置
+smtp_server = config.get('Email', 'smtp_server')
+smtp_username = config.get('Email', 'smtp_username')
+smtp_password = config.get('Email', 'smtp_password')
+from_email = config.get('Email', 'from_email')
+to_emails = config.get('Email', 'to_emails').split(',')
 
 # 读取存储端口号的文件
 with open('port.txt', 'r') as f:
@@ -36,11 +48,11 @@ if result != 0:
     timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     msg = MIMEText(f'端口 {port} 不可用！新的端口：{port+1}.')
     msg['Subject'] = f'{timestamp} - VPN端口修改通知'
-    msg['From'] = 'warning@hello.com'
-    msg['To'] = 'postmaster@hello.com'
-    smtp = smtplib.SMTP('smtp.qiye.aliyun.com')
-    smtp.login('warning@hello.com', '********')
-    smtp.sendmail('warning@hello.com', 'postmaster@hello.com', msg.as_string())
+    msg['From'] = from_email
+    msg['To'] = ', '.join(to_emails)
+    smtp = smtplib.SMTP(smtp_server)
+    smtp.login(smtp_username, smtp_password)
+    smtp.sendmail(from_email, to_emails, msg.as_string())
     smtp.quit()
     # 更新存储端口号的文件
     with open('port.txt', 'w') as f:
@@ -63,3 +75,4 @@ else:
     with open('log.txt', 'a') as f:
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         f.write(f'{timestamp} - Port {port} check result: {result}\n')
+
