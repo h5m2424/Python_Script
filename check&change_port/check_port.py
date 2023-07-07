@@ -22,9 +22,8 @@ smtp_password = config.get('Email', 'smtp_password')
 from_email = config.get('Email', 'from_email')
 to_emails = config.get('Email', 'to_emails').split(',')
 
-# 读取存储端口号的文件
-with open('port.txt', 'r') as f:
-    port = int(f.read().strip())
+# 读取存储端口号的配置
+port = config.getint('Port', 'port')
 
 # 检查服务器的端口是否通
 result = os.system(f'nc -z -w 3 {server} {port}')
@@ -54,9 +53,10 @@ if result != 0:
     smtp.login(smtp_username, smtp_password)
     smtp.sendmail(from_email, to_emails, msg.as_string())
     smtp.quit()
-    # 更新存储端口号的文件
-    with open('port.txt', 'w') as f:
-        f.write(str(port+1))
+    # 更新存储端口号的配置
+    config.set('Port', 'port', str(port+1))
+    with open('config.ini', 'w') as f:
+        config.write(f)
     # 写入日志文件
     with open('log.txt', 'a') as f:
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -75,4 +75,3 @@ else:
     with open('log.txt', 'a') as f:
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         f.write(f'{timestamp} - Port {port} check result: {result}\n')
-
